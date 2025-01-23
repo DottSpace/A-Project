@@ -44,7 +44,7 @@ clear_cmd:
     call screen_clear
     jmp cmd_loop
 
-print_string:         ; Routine to print a string, input on si
+print_string:         ; Routine to print a string, input on ds:si
     pusha
 
     xor bh, bh
@@ -145,7 +145,7 @@ input_string:
     ret
 
 .add_char:
-	stosb
+	stosb               ; in es:di
 
     pusha
 
@@ -266,7 +266,7 @@ screen_clear:
 
 ; ------------------------------------------------------------------
 ; string_purify -- Strip leading and trailing spaces from a string
-; IN: BX = string location
+; IN: DS:BX = string location
 string_purify:
     push cx
     push ax
@@ -310,12 +310,12 @@ string_purify:
 
 .fill_spaces:
     dec si
-    mov byte al, [es:si]
+    mov byte al, [ds:si]
 
     cmp al, ' '
     jne .done
 
-    mov byte [es:si], 0x0
+    mov byte [ds:si], 0x0
     jmp .fill_spaces
 
 .done:
@@ -328,7 +328,7 @@ string_purify:
 
 ; ------------------------------------------------------------------
 ; string_length -- 
-; IN: SI = string location; OUT: CX = length
+; IN: DS:SI = string location; OUT: CX = length
 string_length:
     push ax
     push si
@@ -350,7 +350,7 @@ string_length:
 
 ; ------------------------------------------------------------------
 ; string_compare -- 
-; IN: AX = first string location BX = second string location
+; IN: DS:AX = first string location DS:BX = second string location
 ; OUT: carry flag clear if equal or set if not equal
 string_compare:
     push ax
@@ -373,8 +373,8 @@ string_compare:
     mov di, bx
 
 .keep_comparing:
-    mov byte dl, [es:si]
-    mov byte dh, [es:di]
+    mov byte dl, [ds:si]
+    mov byte dh, [ds:di]
     cmp dh, dl
     jne .not_equal
     
@@ -404,14 +404,14 @@ string_compare:
 ; ------------------------------------------------------------------
 ; string_get_token -- Reads tokens separated by specified char from
 ; a string. Returns pointer to next token, or 0 if none left
-; IN: AH = separator char, SI = beginning; OUT: DI = next token or 0 if none
+; IN: AH = separator char, DS:SI = beginning; OUT: DS:DI = next token or 0 if none
 string_get_token:
     push ax
     push si
 
     ; we search for the specified char
 .keep_searching:
-    mov byte al, [es:si]
+    mov byte al, [ds:si]
     or al, al
     jz .done                ; we are at the end of the string, done.
 
@@ -422,7 +422,7 @@ string_get_token:
     jmp .keep_searching
 
 .send_token:
-    mov byte [es:si], 0x0   ; we replace it by 0
+    mov byte [ds:si], 0x0   ; we replace it by 0
     inc si 
 
 .done:
@@ -433,7 +433,7 @@ string_get_token:
 
 ; ------------------------------------------------------------------
 ; string_toUppercase -- Convert zero-terminated string to upper case
-; IN/OUT: AX = string location
+; IN/OUT: DS:AX = string location
 string_toUppercase:
     push ax
     push si
@@ -441,16 +441,16 @@ string_toUppercase:
     mov si, ax
 
 .keep_up:
-    cmp byte [es:si], 0
+    cmp byte [ds:si], 0
     je .done
 
-    cmp byte [es:si], 'a'
+    cmp byte [ds:si], 'a'
     jb .not_alpha
 
-    cmp byte [es:si], 'z'
+    cmp byte [ds:si], 'z'
     ja .not_alpha
 
-    sub byte [es:si], 0x20
+    sub byte [ds:si], 0x20
 
     inc si
     jmp .keep_up
