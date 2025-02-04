@@ -38,14 +38,17 @@ start:
     xor ax, ax
     mov ds, ax          ; Set data segment to 0
 
+	mov [ebr_drive_number], dl ; BIOS should set DL to drive number
+
     mov si, file_name
     mov ax, 0x2000          ; kernel segment
     mov es, ax
     xor di, di              ; kernel offset
     call loadFile_fromFat
 
-    mov ds, ax          ; setting up the data segment for the kernel
-    jmp 0x2000:0		; Jump to the address where the kernel is loaded
+    mov ds, ax          		; setting up the data segment for the kernel
+	mov dl, [ebr_drive_number]	; passing drive number to the kernel
+    jmp 0x2000:0				; Jump to the address where the kernel is loaded
 
     jmp $
 
