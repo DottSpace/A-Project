@@ -1,3 +1,54 @@
+; ------------------------------------------------------------------
+; print_decimal: Routine to print a number in specify base
+; IN: AX = number, BX = base
+; OUT: Nothing
+print_number:
+    pusha               ; we are calling an interrupt in this function
+
+    mov di, arrayNumber ; an array for all the possible number format
+    xor cx, cx
+
+.divide:                ; We're using the successive division algorithm.
+    xor dx, dx
+    div bx
+    
+    push dx             ; We're pushing DX onto the stack since we need to flip the number when we display it.
+    inc cx
+
+    or ax, ax
+    jnz .divide
+
+.loop:
+    dec cx
+    pop dx
+
+    call .print     ; this print the number on dx using the buffer in di
+
+    or cx, cx
+    jnz .loop
+
+.done:
+    popa
+    ret
+
+.print:
+    push di
+    push es
+
+    mov ax, KERNEL_SEGMENT  ; this is because the array number will be on the kernel segment (very useful when working on different segment)
+    mov es, ax
+
+    add di, dx
+    mov byte al, [es:di]
+    mov ah, 0xE
+    xor bx, bx
+
+    int 10h
+
+    pop es
+    pop di
+    ret
+
 print_string:         ; Routine to print a string, input on ds:si
     pusha
 
@@ -187,3 +238,5 @@ screen_clear:
 
 	popa
 	ret
+
+arrayNumber: db "0123456789ABCDEF"

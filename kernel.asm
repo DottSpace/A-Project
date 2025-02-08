@@ -1,11 +1,15 @@
 org 0x0
 bits 16
 
+KERNEL_SEGMENT EQU 0x2000
+
 jmp main
 
 %include "screen.asm"
 %include "keyboard.asm"
 %include "string.asm"
+%include "disk.asm"
+%include "fat.asm"
 
 main:
     mov ax, ds
@@ -15,7 +19,9 @@ main:
     mov sp, 0
     mov bp, sp
 
-    mov [driveNumber], dl
+    mov [bootDrive], dl
+
+    call fat_initialize
 
 cmd_loop:
     mov si, prompt
@@ -59,6 +65,6 @@ clear_cmd:
 prompt db "> ",0
 input_prompt times 64 db 0
 arguments dw 0
-driveNumber db 0
+bootDrive db 0
 
 clear db "CLEAR", 0
