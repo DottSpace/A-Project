@@ -26,7 +26,7 @@ lba2chs:
 ; read a given number of sector on the disk
 ; IN: AX = LBA index; BX = number of sector to read; ES = memory segment
 ;     DI = memory offset
-; OUT: es:di, carry flag clear set if failed
+; OUT: es:di, carry flag set if failed
 disk_read:
 	pusha
 
@@ -56,7 +56,7 @@ disk_read:
 
 ; ------------------------------------------------------------------
 ; disk_reset -- reset the disk controller
-; IN/OUT: Nothing, carry flag clear set if failed
+; IN/OUT: Nothing, carry flag set if failed
 disk_reset:
 	pusha
 

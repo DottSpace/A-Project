@@ -5,11 +5,11 @@ KERNEL_SEGMENT EQU 0x2000
 
 jmp main
 
+%include "fat.asm"
 %include "screen.asm"
 %include "keyboard.asm"
 %include "string.asm"
 %include "disk.asm"
-%include "fat.asm"
 
 main:
     mov ax, ds
@@ -53,11 +53,21 @@ cmd_loop:
 
     jnc clear_cmd
 
+    mov ax, dir
+    mov bx, input_prompt
+    call string_compare
+
+    jnc dir_cmd
+
     jmp cmd_loop
 
 
 clear_cmd:
     call screen_clear
+    jmp cmd_loop
+
+dir_cmd:
+    call list_file
     jmp cmd_loop
 
 
@@ -68,3 +78,4 @@ arguments dw 0
 bootDrive db 0
 
 clear db "CLEAR", 0
+dir db "DIR", 0

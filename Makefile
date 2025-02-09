@@ -12,6 +12,9 @@ $(BUILD_DIR)/main.img: bootloader.bin kernel.bin
 	$(FAT) -F 12 -n "Aproject" $(BUILD_DIR)/main.img
 	dd if=$(BUILD_DIR)/bootloader.bin of=$(BUILD_DIR)/main.img conv=notrunc
 	mcopy -i $(BUILD_DIR)/main.img $(BUILD_DIR)/kernel.bin "::kernel.bin"
+	mcopy -i $(BUILD_DIR)/main.img file/alone.txt "::alone.txt"
+	mcopy -i $(BUILD_DIR)/main.img file/file.txt "::file.txt"
+	mcopy -i $(BUILD_DIR)/main.img file/test.txt "::test.txt"
 
 bootloader.bin: boot/boot.asm
 	nasm -f bin  boot/boot.asm -o $(BUILD_DIR)/bootloader.bin
