@@ -67,13 +67,50 @@ clear_cmd:
     jmp cmd_loop
 
 dir_cmd:
-    call list_file
+    mov di, dir_list_buffer
+    call get_file_list
+
+    xor cx, cx  ; init counter
+
+.print_loop:
+    mov si, di
+
+    mov ah, ','
+    call string_get_token
+
+    call print_string
+    
+    inc cx
+
+    mov ax, cx
+    and ax, 0x03
+
+    or al, al           ; if it's a multiple of 4 we are in the last column
+    jnz .set_column
+    call print_newline  ; therefore we start to the first column by printing a new line
+
+.set_column:
+    call get_cursor_position
+
+    mov ax, cx
+	and al, 0x03        ; get the current column
+	mov bl, 20          ; compute the next column
+	mul bl
+
+	mov dl, al
+    call set_cursor_position
+
+    cmp byte [ds:di], 0
+    jne .print_loop
+
+    call print_newline
     jmp cmd_loop
 
 
 ; data area ...
 prompt db "> ",0
 input_prompt times 64 db 0
+dir_list_buffer times 0xA80 db 0
 arguments dw 0
 bootDrive db 0
 

@@ -15,6 +15,8 @@ $(BUILD_DIR)/main.img: bootloader.bin kernel.bin
 	mcopy -i $(BUILD_DIR)/main.img file/alone.txt "::alone.txt"
 	mcopy -i $(BUILD_DIR)/main.img file/file.txt "::file.txt"
 	mcopy -i $(BUILD_DIR)/main.img file/test.txt "::test.txt"
+	mcopy -i $(BUILD_DIR)/main.img file/hello.c "::hello.c"
+	mcopy -i $(BUILD_DIR)/main.img file/another.txt "::another.txt"
 
 bootloader.bin: boot/boot.asm
 	nasm -f bin  boot/boot.asm -o $(BUILD_DIR)/bootloader.bin
