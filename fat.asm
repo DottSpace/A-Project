@@ -1,12 +1,12 @@
-bytes_per_sector:		dw 512
-sectors_per_cluster:	db 1
-reserved_sectors:		dw 1
-fat_count:				db 2
-dir_entries_count:		dw 0xe0
-total_sectors:			dw 2880
-sectors_per_fat:		dw 9
-sectors_per_track:		dw 18
-heads:					dw 2
+bytes_per_sector:		    dw 512
+sectors_per_cluster:	    db 1
+reserved_sectors:		    dw 1
+fat_count:				    db 2
+dir_entries_count:		    dw 0xe0
+total_sectors:			    dw 2880
+sectors_per_fat:		    dw 9
+sectors_per_track:		    dw 18
+heads:					    dw 2
 
 
 ROOTDIR_AND_FAT_SEGMENT EQU 0xFA
@@ -84,51 +84,107 @@ fat_initialize:
     pop ax
     ret
 
-list_file:
+; ------------------------------------------------------------------
+; get_file_list --  Generate comma-separated string of files on disk
+; IN: DS:DI = location to store zero-terminated filename string
+; OUT: DS:DI = location where zero-terminated filename string was placed
+get_file_list:
     push ax
     push cx
     push si
+    push di
     push es
+    push ds
+
+;exchange es and ds for lodsb and stosb
+    push es
+    push ds
+    pop es
+    pop ds
 
     mov ax, ROOTDIR_AND_FAT_SEGMENT
-    mov es, ax
+    mov ds, ax
+
     mov word cx, [dir_entries_count]
     mov si, ROOTDIR_OFFSET
 
     add si, 32      ; discard the first entry because it's useless
+    dec cx
 
-.loop:
-    call .print
+.next_entry:
+
+    cmp byte [ds:si], 0 ; check if the entry has a file in it
+    jne .not_empty
+
+    dec cx          ; next entry
+    or cx, cx
+    jz .done
+
+    jmp .next_entry
+
+.not_empty:
+    call .process_entry
     add si, 32
-    loop .loop
+    
+    dec cx
+    or cx, cx
+    jz .done
 
+    mov byte [es:di], ','   ; add separator after the test
+    inc di
+    jmp .next_entry
+
+.done:
+    mov byte [es:di], 0     ; must be a zero terminated string
+
+    pop ds
     pop es
+    pop di
     pop si
     pop cx
     pop ax
     ret
 
-.print:
-    pusha
+.process_entry:
+    push si
+    push cx
 
-    mov cx, 11
-    mov ah, 0xE
-    xor bx, bx
+    mov cx, 8   ; length for file name
 
-.repeat:
-    mov byte al, [es:si]
-    or al, al
-    jz .done
+.loop_name:
+    mov byte al, [ds:si]
 
-    int 10h
+    cmp al, ' '         
+    je .loop_extension  ; if no more character for the file name
 
     inc si
-    loop .repeat
+    stosb
 
-    call print_newline
+    loop .loop_name
 
-.done:
-    popa
+.loop_extension:
+    add si, cx
+
+    mov byte [es:di], '.'   ; add a period for the extension
+    inc di
+
+    mov cx, 3   ; length for extension
+
+.start:
+    lodsb
+
+    cmp al, ' '
+    je .done_process    ; no more character for the extension
+
+    stosb
+
+    loop .start
+
+.done_process:
+    pop cx
+    pop si
     ret
+
+
 
 failed_init_msg: db "fat initialize failed !",10, 13
