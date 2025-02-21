@@ -10,6 +10,7 @@ jmp main
 %include "keyboard.asm"
 %include "string.asm"
 %include "disk.asm"
+%include "math.asm"
 
 main:
     mov ax, ds
