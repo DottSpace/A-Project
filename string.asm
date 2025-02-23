@@ -197,26 +197,3 @@ string_toUppercase:
     pop si
     pop ax
     ret
-
-; ------------------------------------------------------------------
-; get_time_string -- Get current time in a string (eg '10:25')
-; IN/OUT: DS:SI = string location
-get_time_string:
-    push ax
-    push bx
-    push cx
-    push dx
-    push bp
-    push di
-    push sp
-
-    
-
-    pop sp
-    pop di
-    pop bp
-    pop dx
-    pop cx
-    pop bx
-    pop ax
-	ret

@@ -1,5 +1,5 @@
 ; ------------------------------------------------------------------
-; print_decimal: Routine to print a number in specify base
+; print_number: Routine to print a number in specify base
 ; IN: AX = number, BX = base
 ; OUT: Nothing
 print_number:
@@ -238,5 +238,47 @@ screen_clear:
 
 	popa
 	ret
+
+; ------------------------------------------------------------------
+; print_time -- print current time on the screen (eg '10:25')
+; IN/OUT: Nothing
+print_time:
+    pusha
+
+    mov ah, 02h
+    int 1ah
+
+    mov si, .am_string
+
+    or dl, dl
+    jz .pm_time
+    jmp .continue
+
+.pm_time:
+    sub ch, 0x12
+    mov si, .pm_string
+
+.continue:
+    mov ax, cx
+    shr ax, 8       ; hour
+    mov bx, 16
+    call print_number
+
+    xor bx, bx
+    mov ah, 0eh
+    mov al, ':'
+    int 10h
+
+    mov ax, cx
+    and ax, 0x00ff
+    mov bx, 16      ; minute
+    call print_number
+
+    call print_string   ; print am or pm
+
+    popa
+	ret
+.am_string db " AM",0
+.pm_string db " PM",0
 
 arrayNumber: db "0123456789ABCDEF"

@@ -54,6 +54,12 @@ cmd_loop:
 
     jnc clear_cmd
 
+    mov ax, time
+    mov bx, input_prompt
+    call string_compare
+
+    jnc time_cmd
+
     mov ax, dir
     mov bx, input_prompt
     call string_compare
@@ -66,6 +72,12 @@ cmd_loop:
 clear_cmd:
     call screen_clear
     jmp cmd_loop
+
+time_cmd:
+    call print_time
+    call print_newline
+    jmp cmd_loop
+
 
 dir_cmd:
     mov di, dir_list_buffer
@@ -117,3 +129,4 @@ bootDrive db 0
 
 clear db "CLEAR", 0
 dir db "DIR", 0
+time db "TIME"
