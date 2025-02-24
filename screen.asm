@@ -250,8 +250,8 @@ print_time:
 
     mov si, .am_string
 
-    or dl, dl
-    jz .pm_time
+    cmp ch, 0x12
+    ja .pm_time
     jmp .continue
 
 .pm_time:
